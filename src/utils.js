@@ -75,12 +75,20 @@ function isUrlMatching(url, required) {
 
 function isBodyOrParametersMatching(method, body, parameters, required) {
   var allowedParamsMethods = ["delete", "get", "head", "options"];
-  if (allowedParamsMethods.indexOf(method.toLowerCase()) >= 0) {
-    var params = required ? required.params : undefined;
-    return isObjectMatching(parameters, params);
-  } else {
-    return isBodyMatching(body, required);
+  var params;
+
+  if (required) {
+    ({ params } = required);
+    delete required["params"];
   }
+
+  var matching = isObjectMatching(parameters, params);
+
+  if (allowedParamsMethods.indexOf(method.toLowerCase()) === 0) {
+    matching = matching && isBodyMatching(body, required);
+  }
+
+  return matching;
 }
 
 function isObjectMatching(actual, expected) {
